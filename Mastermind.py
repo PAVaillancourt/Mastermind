@@ -1,4 +1,3 @@
-#test
 
 error_message = "Invalid selection!"
 
