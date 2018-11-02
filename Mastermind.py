@@ -1,3 +1,14 @@
+#un ou deux joueurs [pour l'instant, un joueur]
+#qui devine?
+  #un joueur qui devine
+  #générer le code à deviner
+  #while le code n'est pas trouvé ou essais <= nbEssaisMax
+    #demander le choix de pin
+      #si choix == code
+        #gagné
+      #sinon, fonction qui prend le choix, compare avec le code et retourne les indices
+        #sous-fonction qui prend une pin et sa position et compare à toutes les pins-positions du code et retounre blanc, noir ou rien 
+#jouer encore?
 
 error_message = "Invalid selection!"
 
