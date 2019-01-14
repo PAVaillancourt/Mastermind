@@ -1,15 +1,4 @@
-#un ou deux joueurs [pour l'instant, un joueur]
-#qui devine?
-  #un joueur qui devine
-  #générer le code à deviner
-  #while le code n'est pas trouvé ou essais <= nbEssaisMax
-    #demander le choix de pin
-      #si choix == code
-        #gagné
-      #sinon, fonction qui prend le choix, compare avec le code et retourne les indices
-        #sous-fonction qui prend une pin et sa position et compare à toutes les pins-positions du code et retounre blanc, noir ou rien 
-#jouer encore?
-
+import random
 error_message = "Invalid selection!"
 
 # difficulty: normal (4 pins, 6 colours) or hard (5 pins, 8 colours)
@@ -23,38 +12,201 @@ def difficulty_selection():
     else:
       print (error_message)
 
-# checks if the pin input is between the accepted values
-def pin_check (pin, difficulty):
+def single_pin_check(pins, difficulty):
   if difficulty == "hard":
-    if pin not in range(1,9):
-      print (error_message)
-      return False
-    else:
-      return True
+    highest_pin = "8"
   elif difficulty == "normal":
-    if pin not in range(1,7):
-      print (error_message)
+    highest_pin = "6"
+  for i in range(len(pins)):
+    if pins[i] < "1" or pins[i] > highest_pin:
       return False
-    else:
-      return True
+  return True
+
+# checks if the pin input is between the accepted values
+def pin_check (pins, difficulty):
+  if difficulty == "hard":
+    max_pins_lgth = 5
+  elif difficulty == "normal":
+    max_pins_lgth = 4
+  if len(pins) != max_pins_lgth or single_pin_check(pins, difficulty) != True:
+    print (error_message)
+    return False
+  else:
+    return True
 
 # prompts player to select the pins to guess
 def pin_choices(difficulty):
   pin_list = []
   if difficulty == "normal":
-    for position in ["first", "second", "third", "fourth"]:
-      pin = int(input("Select the %s pin (between 1 and 6)" %position))
-      while pin_check(pin, difficulty) != True:
-        pin = int(input("Select the %s pin (between 1 and 6)" %position))
-      pin_list.append(pin)
+    pin_input_message = "Select the four pins (between 1 and 6)"
   elif difficulty == "hard":
-    for position in ["first", "second", "third", "fourth", "fifth"]:
-      pin = int(input("Select the %s pin (between 1 and 8)" %position))
-      while pin_check(pin, difficulty) != True:
-        pin = int(input("Select the %s pin (between 1 and 8)" %position))
-      pin_list.append(pin)
+    pin_input_message = "Select the five pins (between 1 and 8)"
+  pin_list_raw = input(pin_input_message)
+  pin_list = [c for c in pin_list_raw]
+  while pin_check(pin_list, difficulty) != True:
+    pin_list_raw = input(pin_input_message)
+    pin_list = [c for c in pin_list_raw]
   return pin_list
 
+# chooses a random string of 4 or 6 pins for the player to guess
+def code_generator(difficulty):
+  pin_list = []
+  if difficulty == "normal":
+    for i in range(4):
+      pin_list.append(random.randint(1,7))
+  elif difficulty == "hard":
+    for i in range(5):
+      pin_list.append(random.randint(1,9))
+  return pin_list
+
+# prints the board in the console
+def print_board(pin_code, guessed_rows, victory):
+  board = ""
+  
+  # top row
+  if victory == 1 or victory == -1:
+    # revealed top row
+    board += """
+ _____________________________
+| _-*-_   MASTER MIND   _-*-_ |
+|===========|=================|
+|           |  """
+    for i in pin_code:
+      board += str(i) 
+      board += "  "
+    board +=  "|\n|___________|_________________|"
+
+
+  else:
+    # hidden top row
+    board += """
+ _____________________________
+| _-*-_   MASTER MIND   _-*-_ |
+|===========|=================|
+|           |  X  X  X  X  X  |
+|___________|_________________|"""
+
+  # empty rows
+  for i in range(12-len(guessed_rows)):
+    board += """
+|           |                 |
+|           |                 |
+|___________|_________________|"""
+
+  # rows containing guesses
+  for i in range(len(guessed_rows)):
+    board += guessed_rows[i] 
+  
+  #bottom row
+  board += """
+|           |                 |
+|===========|=================|
+|___________|_________________|"""
+
+  return board
+
+# returns a table containing rows containing clue pins and guessed pins
+def print_row(pin_choice, clue_pins):
+  row = "\n|           |                 |"
+  row += "\n"
+  row += "| "
+  for i in clue_pins:
+    row += (i+" ")
+
+  row += "|  "
+  for i in range(len(pin_choice)):
+    row += str(pin_choice[i])
+    row += "  "
+  row += "|\n"
+
+  row += "|___________|_________________|"
+
+  return row
+
+# returns a list of clue pins
+def clue_pins_generator(guessed_pins, pin_code):
+  dummy_guessed_pins = guessed_pins.copy()
+  dummy_pin_code = pin_code.copy()
+
+  clue_pins = {"x":0, "o": 0, " ":0}
+  
+  for i in range(len(dummy_guessed_pins)):
+    for j in range(i, len(dummy_pin_code)):
+      if dummy_guessed_pins[i] == dummy_pin_code[j]:
+        if i != j:
+          continue
+        elif i == j:
+          clue_pins["x"] += 1
+          dummy_pin_code[j] = 9
+          dummy_guessed_pins[i] = 0
+          break
+
+  for i in range(len(dummy_guessed_pins)):
+    for j in range(len(dummy_pin_code)):
+      if dummy_guessed_pins[i] == dummy_pin_code[j]:
+        clue_pins["o"] += 1
+        dummy_pin_code[j] = 9
+        dummy_guessed_pins[i] = 0
+        break
+
+  for i in range(len(dummy_guessed_pins)):
+    # no identical unmatched pin left  
+    if dummy_guessed_pins[i] not in dummy_pin_code and dummy_guessed_pins[i] != 0:
+      clue_pins[" "] += 1
+
+  clue_pins_list = []
+  clue_pins_list += (["x"]*clue_pins["x"]) + (["o"]*clue_pins["o"]) + ([" "]*clue_pins[" "])
+  return clue_pins_list
+
+# converts a list of characters to a list of integers
+def char_to_int(char_list):
+  int_list = []
+  for i in char_list:
+    int_list.append(int(i))
+  return int_list
+
+# main game 
+def mastermind():
+  # difficulty = difficulty_selection() (a ajouter quand tableau formaté pour normal)
+  code = code_generator("hard"  )
+  guesses_left = 12
+  victory = 0
+  guesses = []
+
+  while guesses_left > 0 and victory == 0:
+    guess_char = pin_choices("hard")
+    guess = char_to_int(guess_char)
+    clues = clue_pins_generator(guess, code)
+    guesses.insert(0,print_row(guess, clues))
+    if guess == code:
+      victory = 1
+    elif guesses_left == 1:
+      victory = -1
+    print(print_board(code, guesses, victory))
+    guesses_left -= 1
+  
+  if victory == 1:
+    print("\nVictory!")
+  else:
+    print("Boo")
+
+
+# TODO
+# settings (board length, number of pins to guess, number of numbers)
+# bot
+
 # difficulty_selection()
-# print(pin_check(3, "normal"))
-print(pin_choices(difficulty_selection()))
+#print(pin_check([9,8,9,8,9], "hard"))
+#pin_choices("normal")
+#print(code_generator(difficulty_selection()))
+#print(print_board([1,2,3,4,5],[print_row([1,2,3,4,5],[1,1,0,-1,-1]),
+# print_row([1,9,3,4,5],[1,0,0,-1,-1]),
+# print_row([1,2,3,4,5],[1,1,0,-1,-1])],1))
+# print(clue_pins_generator([2,2,3,4,5],[9,8,3,3,4])==["x","o"," "," "," "])
+# print(clue_pins_generator([1,2,6,1,1],[1,2,6,7,1]))
+# print(clue_pins_generator([2,2,3,4,5],[9,8,3,3,4])==["x","o"," "," "," "])
+#print(clue_pins_generator([1,1,2,1,1],[1,2,1,1,2]))
+
+#pin_check([1,2,3,4,9], "hard")
+
+mastermind()
