@@ -52,10 +52,10 @@ def pin_choices(difficulty):
 def code_generator(difficulty):
   pin_list = []
   if difficulty == "normal":
-    available_pins = [1,1,2,2,3,3,4,4,5,5,6,6,7,7]
+    available_pins = [1,1,2,2,3,3,4,4,5,5,6,6]
     code_length = 4
   elif difficulty == "hard":
-    available_pins = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9]
+    available_pins = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8]
     code_length = 5
   for i in range(code_length):
     chosen_pin = random.choice(available_pins)
@@ -64,45 +64,86 @@ def code_generator(difficulty):
   return pin_list
 
 # prints the board in the console
-def print_board(pin_code, guessed_rows, victory):
+def print_board(pin_code, guessed_rows, difficulty, victory):
   board = ""
   
-  # top row
-  if victory == 1 or victory == -1:
-    # revealed top row
-    board += """
+  if difficulty == "hard":
+    # top row
+    if victory == 1 or victory == -1:
+      # revealed top row
+      board += """
  _____________________________
 | _-*-_   MASTER MIND   _-*-_ |
 |===========|=================|
 |           |  """
-    for i in pin_code:
-      board += str(i) 
-      board += "  "
-    board +=  "|\n|___________|_________________|"
+      for i in pin_code:
+        board += str(i) 
+        board += "  "
+      board +=  "|\n|___________|_________________|"
 
 
-  else:
-    # hidden top row
-    board += """
+    else:
+      # hidden top row
+      board += """
  _____________________________
 | _-*-_   MASTER MIND   _-*-_ |
 |===========|=================|
 |           |  X  X  X  X  X  |
 |___________|_________________|"""
 
-  # empty rows
-  for i in range(12-len(guessed_rows)):
-    board += """
+    # empty rows
+    for i in range(12-len(guessed_rows)):
+      board += """
 |           |                 |
 |           |                 |
 |___________|_________________|"""
 
-  # rows containing guesses
-  for i in range(len(guessed_rows)):
-    board += guessed_rows[i] 
-  
-  #bottom row
-  board += """
+    # rows containing guesses
+    for i in range(len(guessed_rows)):
+      board += guessed_rows[i] 
+    
+    #bottom row
+    board += """
+|           |                 |
+|===========|=================|
+|___________|_________________|"""
+
+  elif difficulty == "normal":
+    # top row
+    if victory == 1 or victory == -1:
+      # revealed top row
+      board += """
+ _____________________________
+| _-*-_   MASTER MIND   _-*-_ |
+|===========|=================|
+|           |  """
+      for i in pin_code:
+        board += str(i) 
+        board += "  "
+      board +=  "   |\n|___________|_________________|"
+
+    else:
+      # hidden top row
+        board += """
+ _____________________________
+| _-*-_   MASTER MIND   _-*-_ |
+|===========|=================|
+|           |  X  X  X  X     |
+|___________|_________________|"""
+
+    # empty rows
+    for i in range(12-len(guessed_rows)):
+      board += """
+|           |                 |
+|           |                 |
+|___________|_________________|"""
+
+    # rows containing guesses
+    for i in range(len(guessed_rows)):
+      board += guessed_rows[i] 
+    
+    #bottom row
+    board += """
 |           |                 |
 |===========|=================|
 |___________|_________________|"""
@@ -110,18 +151,29 @@ def print_board(pin_code, guessed_rows, victory):
   return board
 
 # returns a table containing rows containing clue pins and guessed pins
-def print_row(pin_choice, clue_pins):
+def print_row(pin_choice, clue_pins, difficulty):
   row = "\n|           |                 |"
   row += "\n"
   row += "| "
-  for i in clue_pins:
-    row += (i+" ")
+  if difficulty == "hard":
+    for i in clue_pins:
+      row += (i+" ")
 
-  row += "|  "
-  for i in range(len(pin_choice)):
-    row += str(pin_choice[i])
-    row += "  "
-  row += "|\n"
+    row += "|  "
+    for i in range(len(pin_choice)):
+      row += str(pin_choice[i])
+      row += "  "
+    row += "|\n"
+  
+  elif difficulty == "normal":
+    for i in clue_pins:
+      row += (i+" ")
+
+    row += "  |  "
+    for i in range(len(pin_choice)):
+      row += str(pin_choice[i])
+      row += "  "
+    row += "   |\n"
 
   row += "|___________|_________________|"
 
@@ -133,7 +185,7 @@ def clue_pins_generator(guessed_pins, pin_code):
   dummy_pin_code = pin_code.copy()
 
   clue_pins = {"x":0, "o": 0, " ":0}
-  
+
   for i in range(len(dummy_guessed_pins)):
     for j in range(i, len(dummy_pin_code)):
       if dummy_guessed_pins[i] == dummy_pin_code[j]:
@@ -171,22 +223,23 @@ def char_to_int(char_list):
 
 # main game 
 def mastermind():
-  # difficulty = difficulty_selection() (a ajouter quand tableau formaté pour normal)
-  code = code_generator("hard"  )
+  difficulty = difficulty_selection() #(a ajouter quand tableau formaté pour normal)
+#  difficulty = "hard"
+  code = code_generator(difficulty)
   guesses_left = 12
   victory = 0
   guesses = []
 
   while guesses_left > 0 and victory == 0:
-    guess_char = pin_choices("hard")
+    guess_char = pin_choices(difficulty)
     guess = char_to_int(guess_char)
     clues = clue_pins_generator(guess, code)
-    guesses.insert(0,print_row(guess, clues))
+    guesses.insert(0,print_row(guess, clues, difficulty))
     if guess == code:
       victory = 1
     elif guesses_left == 1:
       victory = -1
-    print(print_board(code, guesses, victory))
+    print(print_board(code, guesses, difficulty, victory))
     guesses_left -= 1
   
   if victory == 1:
@@ -201,17 +254,17 @@ def mastermind():
 
 # Tests
 
-# difficulty_selection()
-# print(pin_check([9,8,9,8,9], "hard"))
-# pin_choices("normal")
-# print(code_generator("hard"))
-# print(print_board([1,2,3,4,5],[print_row([1,2,3,4,5],[1,1,0,-1,-1]),
-# print_row([1,9,3,4,5],[1,0,0,-1,-1]),
-# print_row([1,2,3,4,5],[1,1,0,-1,-1])],1))
-# print(clue_pins_generator([2,2,3,4,5],[9,8,3,3,4])==["x","o"," "," "," "])
-# print(clue_pins_generator([1,2,6,1,1],[1,2,6,7,1]))
-# print(clue_pins_generator([2,2,3,4,5],[9,8,3,3,4])==["x","o"," "," "," "])
-# print(clue_pins_generator([1,1,2,1,1],[1,2,1,1,2]))
-# pin_check([1,2,3,4,9], "hard")
+#difficulty_selection()
+#print(pin_check([9,8,9,8,9], "hard"))
+#pin_choices("normal")
+#print(code_generator("hard"))
+#print(print_board([1,2,3,4,5],[print_row([1,2,3,4,5],[1,1,0,-1,-1]),
+#print_row([1,9,3,4,5],[1,0,0,-1,-1])
+#print_row([1,2,3,4,5],[1,1,0,-1,-1])
+#print(clue_pins_generator([2,2,3,4,5],[9,8,3,3,4])==["x","o"," "," "," "])
+#print(clue_pins_generator([1,2,6,1,1],[1,2,6,7,1]))
+#print(clue_pins_generator([2,2,3,4,5],[9,8,3,3,4])==["x","o"," "," "," "])
+#print(clue_pins_generator([1,1,2,1,1],[1,2,1,1,2]))
+#pin_check([1,2,3,4,9], "hard")
 
 mastermind()
