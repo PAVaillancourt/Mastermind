@@ -52,11 +52,15 @@ def pin_choices(difficulty):
 def code_generator(difficulty):
   pin_list = []
   if difficulty == "normal":
-    for i in range(4):
-      pin_list.append(random.randint(1,7))
+    available_pins = [1,1,2,2,3,3,4,4,5,5,6,6,7,7]
+    code_length = 4
   elif difficulty == "hard":
-    for i in range(5):
-      pin_list.append(random.randint(1,9))
+    available_pins = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9]
+    code_length = 5
+  for i in range(code_length):
+    chosen_pin = random.choice(available_pins)
+    pin_list.append(chosen_pin)
+    available_pins.remove(chosen_pin)
   return pin_list
 
 # prints the board in the console
@@ -195,18 +199,19 @@ def mastermind():
 # settings (board length, number of pins to guess, number of numbers)
 # bot
 
+# Tests
+
 # difficulty_selection()
-#print(pin_check([9,8,9,8,9], "hard"))
-#pin_choices("normal")
-#print(code_generator(difficulty_selection()))
-#print(print_board([1,2,3,4,5],[print_row([1,2,3,4,5],[1,1,0,-1,-1]),
+# print(pin_check([9,8,9,8,9], "hard"))
+# pin_choices("normal")
+# print(code_generator("hard"))
+# print(print_board([1,2,3,4,5],[print_row([1,2,3,4,5],[1,1,0,-1,-1]),
 # print_row([1,9,3,4,5],[1,0,0,-1,-1]),
 # print_row([1,2,3,4,5],[1,1,0,-1,-1])],1))
 # print(clue_pins_generator([2,2,3,4,5],[9,8,3,3,4])==["x","o"," "," "," "])
 # print(clue_pins_generator([1,2,6,1,1],[1,2,6,7,1]))
 # print(clue_pins_generator([2,2,3,4,5],[9,8,3,3,4])==["x","o"," "," "," "])
-#print(clue_pins_generator([1,1,2,1,1],[1,2,1,1,2]))
-
-#pin_check([1,2,3,4,9], "hard")
+# print(clue_pins_generator([1,1,2,1,1],[1,2,1,1,2]))
+# pin_check([1,2,3,4,9], "hard")
 
 mastermind()
