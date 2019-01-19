@@ -1,3 +1,6 @@
+# Pierre Antoine Vaillancourt
+# Last edit 2019-01-19
+
 import random
 error_message = "Invalid selection!"
 
@@ -12,6 +15,7 @@ def difficulty_selection():
     else:
       print (error_message)
 
+# checks if entered pin is within accepted range
 def single_pin_check(pins, difficulty):
   if difficulty == "hard":
     highest_pin = "8"
@@ -221,14 +225,25 @@ def char_to_int(char_list):
     int_list.append(int(i))
   return int_list
 
+# return true if player wants to play again or false if not
+def play_again():
+  answer = input("Play again?")
+  if answer in ["Yes", "yes", "y"]:
+    return True
+  elif answer in ["No", "no", "n"]:
+    return False
+  else:
+    print ("Please make a valid selection")
+    return play_again()
+
 # main game 
 def mastermind():
-  difficulty = difficulty_selection() #(a ajouter quand tableau formaté pour normal)
-#  difficulty = "hard"
+  difficulty = difficulty_selection()
   code = code_generator(difficulty)
   guesses_left = 12
   victory = 0
   guesses = []
+  print(print_board(code, guesses, difficulty, victory))
 
   while guesses_left > 0 and victory == 0:
     guess_char = pin_choices(difficulty)
@@ -245,7 +260,12 @@ def mastermind():
   if victory == 1:
     print("\nVictory!")
   else:
-    print("Boo")
+    print("\nBetter luck next time!")
+  if play_again():
+    mastermind()
+  else:
+    print("Thank you for playing!")
+
 
 
 # TODO
