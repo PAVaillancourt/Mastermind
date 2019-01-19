@@ -2,7 +2,7 @@
 # Last edit 2019-01-19
 
 import random
-error_message = "Invalid selection!"
+error_message = "Please make a valid selection."
 
 # difficulty: normal (4 pins, 6 colours) or hard (5 pins, 8 colours)
 def difficulty_selection():
@@ -148,9 +148,10 @@ def print_board(pin_code, guessed_rows, difficulty, victory):
     
     #bottom row
     board += """
-|           |                 |
-|===========|=================|
-|___________|_________________|"""
+|                             |
+| x: correct number and place |
+| o: correct number           |
+|_____________________________|"""
 
   return board
 
@@ -232,8 +233,11 @@ def play_again():
     return True
   elif answer in ["No", "no", "n"]:
     return False
+  elif answer == "maybe".lower():
+    print("Make up your mind!")
+    return play_again()
   else:
-    print ("Please make a valid selection")
+    print (error_message)
     return play_again()
 
 # main game 
